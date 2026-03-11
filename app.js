@@ -3675,10 +3675,20 @@ app.post('/createProduceData', isAuth, async (req, res) => {
             return res.send({ success: false, message: 'Produce names and quantities must have the same length!' });
         }
 
+        // Consolidate duplicate produce names
+        const consolidated = {};
+        produceNames.forEach((name, i) => {
+            const trimmedName = name.trim();
+            consolidated[trimmedName] = (consolidated[trimmedName] || 0) + produceQuantities[i];
+        });
+
+        const finalNames = Object.keys(consolidated);
+        const finalQuantities = Object.values(consolidated);
+
         // Upsert: update if exists, create if not
         const updated = await ProduceInventory.findOneAndUpdate(
             { urn: urn.trim().toLowerCase() },
-            { urn: urn.trim().toLowerCase(), produceNames, produceQuantities, updatedAt: new Date() },
+            { urn: urn.trim().toLowerCase(), produceNames: finalNames, produceQuantities: finalQuantities, updatedAt: new Date() },
             { upsert: true, new: true }
         );
 

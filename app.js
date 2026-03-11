@@ -108,26 +108,26 @@ const transporter = nodemailer.createTransport({
     port: 587,
     secure: false, // Use `true` for port 465, `false` for all other ports
     auth: {
-        user: "techcrafters6@gmail.com",
-        pass: "fbsq smvq dxyc bscw",
+        user: process.env.EMAIL_USER || "techcrafters6@gmail.com",
+        pass: process.env.EMAIL_PASS || "fbsq smvq dxyc bscw",
     },
 })
 const sendEmail = async (mailto, content) => {
     const mailOptions = {
         from: {
-            name: "Drug Tracker bot",
-            address: "techcrafters6@gmail.com"
+            name: "Agri-Supply Alerts",
+            address: process.env.EMAIL_USER || "techcrafters6@gmail.com"
         },
         to: mailto,
-        subject: `Drug Tracker - ${content.batchId} Status update`,
-        text: `Container Alert from Drug Tracker - Container ${content.containerId} has been updated to ${content.deliveryStatus} at ${content.timestamp}, sent by ${content.urn}. The container is currently ${content.lockStatus}.`,
+        subject: `Agri-Supply - ${content.batchId} Status update`,
+        text: `Container Alert from Agri-Supply - Container ${content.containerId} has been updated to ${content.deliveryStatus} at ${content.timestamp}, sent by ${content.urn}. The container is currently ${content.lockStatus}.`,
         html: `
     <!DOCTYPE html>
     <html lang="en">
     <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Container Alert from Drug Tracker</title>
+    <title>Container Alert from Agri-Supply</title>
     <style>
         body {
         font-family: Arial, sans-serif;
@@ -170,7 +170,7 @@ const sendEmail = async (mailto, content) => {
     <body>
 
     <div class="container">
-        <h1>Container Alert from Drug Tracker</h1>
+        <h1>Container Alert from Agri-Supply</h1>
         
         <p>We would like to inform you that the status of the container with ID <span class="status">${content.containerId}</span> in batch <span class="status">${content.batchId}</span> has been updated.</p>
         
@@ -178,8 +178,8 @@ const sendEmail = async (mailto, content) => {
         <p><span>Container Shipped By:</span> ${content.urn}</p>
         <p><span>Shipped At:</span> ${content.timestamp}</p>
         <p><span>Delivering to:</span> ${content.receiver}</p>
-        <p><span>Drug name:</span> ${content.drugName}</p>
-        <p><span>Drug Quantity:</span> ${content.quantity}</p>
+        <p><span>Product name:</span> ${content.drugName}</p>
+        <p><span>Quantity:</span> ${content.quantity}</p>
         <p><span>Current Delivery Status:</span> ${content.deliveryStatus}</p>
         <p><span>Current Lock Status:</span> ${content.lockStatus}</p>
         </div>
@@ -205,19 +205,19 @@ const sendEmail = async (mailto, content) => {
 const sendEmergencyEmail = async (mailto, content) => {
     const mailOptions = {
         from: {
-            name: "Drug Tracker bot",
-            address: "techcrafters6@gmail.com"
+            name: "Agri-Supply Alerts",
+            address: process.env.EMAIL_USER || "techcrafters6@gmail.com"
         },
         to: mailto,
         subject: `Emergency Alert - Container ${content.containerId} Unlock Status Update`,
-        text: `Emergency Alert from Drug Tracker - Container ${content.containerId} in batch ${content.batchId} has been unlocked at ${content.timestamp}. The container was sent by ${content.urn} and is currently ${content.lockStatus}. The delivery status is ${content.deliveryStatus}.`,
+        text: `Emergency Alert from Agri-Supply - Container ${content.containerId} in batch ${content.batchId} has been unlocked at ${content.timestamp}. The container was sent by ${content.urn} and is currently ${content.lockStatus}. The delivery status is ${content.deliveryStatus}.`,
         html: `
       <!DOCTYPE html>
       <html lang="en">
       <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Emergency Alert from Drug Tracker</title>
+      <title>Emergency Alert from Agri-Supply</title>
       <style>
           body {
           font-family: Arial, sans-serif;
@@ -303,12 +303,12 @@ const sendEmergencyEmail = async (mailto, content) => {
 const sendTamperingReportEmail = async (mailto, content) => {
     const mailOptions = {
         from: {
-            name: "Drug Tracker bot",
-            address: "techcrafters6@gmail.com"
+            name: "Agri-Supply Alerts",
+            address: process.env.EMAIL_USER || "techcrafters6@gmail.com"
         },
         to: mailto,
         subject: `Urgent Report - Suspected Malfunction/Tampering with Container ${content.batchId}`,
-        text: `Urgent Tampering Report from Drug Tracker - We have received a report of suspected malfunction or tampering of the container with ID ${content.batchId}. Below are the details:
+        text: `Urgent Tampering Report from Agri-Supply - We have received a report of suspected malfunction or tampering of the container with ID ${content.batchId}. Below are the details:
     
     - Reported by: ${content.fullname}
     - Contact Number: ${content.contact}
@@ -397,8 +397,8 @@ const sendTamperingReportEmail = async (mailto, content) => {
 const sendTerminationRequestEmail = async (mailto, content) => {
     const mailOptions = {
         from: {
-            name: "Drug Tracker bot",
-            address: "techcrafters6@gmail.com"
+            name: "Agri-Supply Alerts",
+            address: process.env.EMAIL_USER || "techcrafters6@gmail.com"
         },
         to: mailto,
         subject: `Termination Request ${content.batchId}`,
@@ -491,12 +491,12 @@ const sendTerminationRequestEmail = async (mailto, content) => {
 const sendAssignmentEmail = async (mailto, content) => {
     const mailOptions = {
         from: {
-            name: "Drug Tracker bot",
-            address: "techcrafters6@gmail.com"
+            name: "Agri-Supply Alerts",
+            address: process.env.EMAIL_USER || "techcrafters6@gmail.com"
         },
         to: mailto,
-        subject: `Drug Tracker - New Batch Assignment (${content.batchId})`,
-        text: `New Batch Assignment from Drug Tracker - A new batch ${content.batchId} (Container: ${content.containerId}) has been assigned to ${content.receiver}.
+        subject: `Agri-Supply - New Batch Assignment (${content.batchId})`,
+        text: `New Batch Assignment from Agri-Supply - A new batch ${content.batchId} (Container: ${content.containerId}) has been assigned to ${content.receiver}.
         
         Details:
         - Drug Name: ${content.drugName}
@@ -638,7 +638,7 @@ const sendAssignmentEmail = async (mailto, content) => {
             </div>
 
             <div class="footer">
-                <p>This is an automated message from Drug Tracker System.</p>
+                <p>This is an automated message from Agri-Supply System.</p>
             </div>
         </div>
 
@@ -659,12 +659,12 @@ const sendAssignmentEmail = async (mailto, content) => {
 const sendGeoAlertEmail = async (mailto, content) => {
     const mailOptions = {
         from: {
-            name: "Drug Tracker bot",
-            address: "techcrafters6@gmail.com"
+            name: "Agri-Supply Alerts",
+            address: process.env.EMAIL_USER || "techcrafters6@gmail.com"
         },
         to: mailto,
         subject: `Geo-Fence Alert - Container ${content.containerId || 'Unknown'} Deviation`,
-        text: `Geo-Fence Alert from Drug Tracker - A deviation has been detected for container ${content.containerId || 'Unknown'}.
+        text: `Geo-Fence Alert from Agri-Supply - A deviation has been detected for container ${content.containerId || 'Unknown'}.
         
         Details:
         - Location: ${content.lat}, ${content.lon}
@@ -740,6 +740,32 @@ app.post('/notify-delay', async (req, res) => {
         driverContact
     } = req.body;
 
+    console.log(`[Notification] Delay alert requested for Shipment: ${shipmentId}`);
+
+    // Fetch shipment and users to find recipients
+    let recipients = [farmerEmail || 'techcrafters6@gmail.com', 'abishekalagu07@gmail.com', 'hi@gmail.com'];
+
+    try {
+        const shipment = await batchModel.findOne({ id: shipmentId }) || await containerModel.findOne({ shipmentId });
+        if (shipment) {
+            const urn = shipment.urn;
+            const receiverUsername = (shipment.endUser || shipment.receiver);
+
+            const [manufacturer, receiver] = await Promise.all([
+                userModel.findOne({ urn: urn?.toLowerCase().trim() }),
+                userModel.findOne({ username: receiverUsername })
+            ]);
+
+            if (manufacturer?.email) recipients.push(manufacturer.email);
+            if (receiver?.email) recipients.push(receiver.email);
+
+            // Deduplicate
+            recipients = [...new Set(recipients)];
+        }
+    } catch (err) {
+        console.error("Error finding recipients for delay alert:", err);
+    }
+
     if (!farmerName || !productName) {
         return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
@@ -765,16 +791,17 @@ Agri-Supply Logistics`;
     // 1. Send Email Alert
     try {
         if (process.env.EMAIL_USER && process.env.EMAIL_USER !== 'dummy@example.com') {
-            await transporter.sendMail({
+            const info = await transporter.sendMail({
                 from: `"Agri-Supply Alerts" <${process.env.EMAIL_USER}>`,
-                to: farmerEmail || 'test@example.com',
+                to: recipients.join(', '),
                 subject: `⚠️ URGENT: Shipment Delayed - ${productName}`,
                 text: messageBody
             });
+            console.log('Delay Email sent successfully:', info.messageId, 'to:', recipients);
             emailSuccess = true;
         } else {
             console.log('\n--- [DUMMY MODE] EMAIL DISPATCH ---');
-            console.log(`To: ${farmerEmail}`);
+            console.log(`To: ${recipients.join(', ')}`);
             console.log(`Subject: ⚠️ URGENT: Shipment Delayed - ${productName}`);
             emailSuccess = true;
         }
@@ -803,7 +830,12 @@ Agri-Supply Logistics`;
     res.json({
         success: true,
         message: 'Notification alert processed.',
-        details: { emailSent: emailSuccess, smsSuccess: smsSuccess }
+        details: {
+            emailSent: emailSuccess,
+            smsSuccess: smsSuccess,
+            recipient: farmerEmail,
+            mode: process.env.EMAIL_USER ? 'LIVE' : 'DUMMY'
+        }
     });
 });
 
@@ -2514,7 +2546,7 @@ app.post('/createContainer', async (req, res) => {
 //             id, containerId, validatedDrugName, Math.floor(new Date(expiryDate).getTime() / 1000), lockStatus, Math.floor(new Date(manufacturingDate).getTime() / 1000), quantity, receiver, deliveryStatus, tamperSealNo, urn
 //         );
 
-//         const mailto = ['spiderspoider@gmail.com','josewin067@gmail.com','subhinkrishna.sk@gmail.com',Manufacturer.email,Receiver.email]
+//         const mailto = ['abishekalagu07@gmail.com','hi@gmail.com','subhinkrishna.sk@gmail.com',Manufacturer.email,Receiver.email]
 
 //         const content = {
 //             containerId: containerId,
@@ -2671,7 +2703,7 @@ app.post('/createContainer', async (req, res) => {
         console.log("Saved to MongoDB:", savedContainer);
 
         // Send email notifications
-        const mailto = ['spiderspoider@gmail.com', 'josewin067@gmail.com', 'subhinkrishna.sk@gmail.com', Manufacturer.email, Receiver.email];
+        const mailto = ['abishekalagu07@gmail.com', 'hi@gmail.com', 'subhinkrishna.sk@gmail.com', Manufacturer.email, Receiver.email];
         const content = {
             containerId: containerId,
             batchId: id,
@@ -2766,7 +2798,7 @@ app.post('/update-container', isAuth, async (req, res) => {
 
 
 
-        const mailto = ['spiderspoider@gmail.com', 'josewin067@gmail.com', Manufacturer.email, Receiver.email]
+        const mailto = ['abishekalagu07@gmail.com', 'hi@gmail.com', Manufacturer.email, Receiver.email]
 
         const content = {
             containerId: containerId,
@@ -3030,7 +3062,7 @@ const handleEmergencyAlert = async (deviceChannel, deviceFeed) => {
                 const geo = lat.concat(',', lon)
 
                 if (fetchedContainer) {
-                    const mailto = ['spiderspoider@gmail.com', 'josewin067@gmail.com']
+                    const mailto = ['abishekalagu07@gmail.com', 'hi@gmail.com']
                     // const mailto = ['subhinkrishna.sk@gmail.com']
 
 
@@ -3293,7 +3325,8 @@ app.post("/reportcheckpoint", isAuth, async (req, res) => {
         const { id, containerId, drugName, expiryDate, manufacturingDate, quantity, receiver, status, tamperSealNo, urn } = formData
         console.log('formdata', id, containerId, drugName, expiryDate, manufacturingDate, quantity, receiver, status, tamperSealNo, urn)
 
-        const mailto = ['spiderspoider@gmail.com', 'josewin067@gmail.com', Manufacturer.email, Receiver.email]
+        const mailto = ['abishekalagu07@gmail.com', 'hi@gmail.com', Manufacturer.email, Receiver.email]
+
 
         const content = {
             fullname: req.session.userInfo.username,

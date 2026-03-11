@@ -1,4 +1,9 @@
 const nodemailer = require("nodemailer");
+require('dotenv').config();
+
+console.log("Testing Nodemailer with:");
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "****" : "MISSING");
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -6,30 +11,23 @@ const transporter = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-        user: "techcrafters6@gmail.com",
-        pass: "fbsq smvq dxyc bscw",
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
     },
 });
 
-const sendTestEmail = async () => {
-    const mailOptions = {
-        from: {
-            name: "Drug Tracker Test",
-            address: "techcrafters6@gmail.com"
-        },
-        to: "techcrafters6@gmail.com", // Send to self for testing
-        subject: "Test Email from Drug Tracker",
-        text: "This is a test email to verify the nodemailer configuration.",
-    };
-
-    try {
-        console.log("Attempting to send email...");
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent successfully!");
-        console.log("Message ID:", info.messageId);
-    } catch (error) {
-        console.error("Error sending email:", error);
-    }
+const mailOptions = {
+    from: '"Agri-Supply Test" <' + process.env.EMAIL_USER + '>',
+    to: "techcrafters6@gmail.com", // testing to itself
+    subject: "Backend Email Test",
+    text: "This is a direct test of the Nodemailer transporter from a script.",
 };
 
-sendTestEmail();
+transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+        console.log("Error occurred:", error.message);
+    } else {
+        console.log("Email sent successfully:", info.messageId);
+    }
+    process.exit();
+});

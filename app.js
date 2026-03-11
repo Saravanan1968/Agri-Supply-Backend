@@ -19,17 +19,30 @@ app.listen(PORT, '0.0.0.0', () => {
 
 mongoose.connect(MongoDBURI).then(() => console.log('MongoDB connected Sucessfully!')).catch(err => console.log('Error in connecting to MongoDB: ', err))
 
+app.use((req, res, next) => {
+    console.log(`[Request] ${req.method} ${req.url} | Origin: ${req.headers.origin}`);
+    next();
+});
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(Session({
     secret: 'SK_Key',
     resave: false,
     saveUninitialized: false,
-    store: Store
+    store: Store,
+    proxy: true,
+    cookie: {
+        sameSite: 'none',
+        secure: true,
+        maxAge: 1000 * 60 * 60 * 24 // 1 day
+    }
 }))
 app.use(cors({
     origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://agri-supply-frontend.vercel.app'],
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }))
 
 

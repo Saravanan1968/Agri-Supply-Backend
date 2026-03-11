@@ -28,7 +28,7 @@ app.use(Session({
     store: Store
 }))
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://agri-supply-frontend.vercel.app'],
     credentials: true
 }))
 

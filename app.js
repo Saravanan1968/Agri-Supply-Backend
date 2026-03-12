@@ -131,6 +131,54 @@ const transporter = nodemailer.createTransport({
     logger: true, // Enable logging
     debug: true   // Include SMTP traffic in logs
 })
+
+/**
+ * Sends email via Brevo REST API (HTTP Port 443)
+ * This bypasses SMTP port blocking on hosting providers like Render.
+ */
+const sendEmailViaBrevo = async (toEmails, subject, text, htmlContent) => {
+    const apiKey = process.env.BREVO_API_KEY;
+    if (!apiKey) {
+        console.error("BREVO_API_KEY not found in environment variables.");
+        return { success: false, error: "Missing API Key" };
+    }
+
+    const payload = {
+        sender: {
+            name: "Agri-Supply Alerts",
+            email: process.env.EMAIL_USER || "techcrafters6@gmail.com"
+        },
+        to: toEmails.map(email => ({ email: email })),
+        subject: subject,
+        textContent: text,
+        htmlContent: htmlContent || text.replace(/\n/g, '<br>')
+    };
+
+    try {
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'api-key': apiKey,
+                'accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            console.log('Brevo Email sent successfully:', data.messageId);
+            return { success: true, messageId: data.messageId };
+        } else {
+            console.error('Brevo API Error:', data);
+            return { success: false, error: data.message || 'Unknown API Error' };
+        }
+    } catch (error) {
+        console.error('Brevo Fetch Error:', error);
+        return { success: false, error: error.message };
+    }
+};
+
 const sendEmail = async (mailto, content) => {
     const mailOptions = {
         from: {

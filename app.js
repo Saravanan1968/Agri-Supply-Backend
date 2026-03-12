@@ -118,12 +118,15 @@ const twilioClient = twilio(
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // Use `true` for port 465, `false` for all other ports
+    port: 465,
+    secure: true, // Use port 465 for SMTPS
     auth: {
         user: process.env.EMAIL_USER || "techcrafters6@gmail.com",
         pass: process.env.EMAIL_PASS || "fbsq smvq dxyc bscw",
     },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
 })
 const sendEmail = async (mailto, content) => {
     const mailOptions = {

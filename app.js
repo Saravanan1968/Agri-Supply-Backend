@@ -117,16 +117,19 @@ const twilioClient = twilio(
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true, // Use port 465 for SMTPS
     auth: {
         user: process.env.EMAIL_USER || "techcrafters6@gmail.com",
         pass: process.env.EMAIL_PASS || "fbsq smvq dxyc bscw",
     },
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
+    dnsTimeout: 10000,
+    tls: {
+        rejectUnauthorized: false
+    },
+    logger: true, // Enable logging
+    debug: true   // Include SMTP traffic in logs
 })
 const sendEmail = async (mailto, content) => {
     const mailOptions = {
@@ -837,8 +840,8 @@ Agri-Supply Logistics`;
                     emailSuccess = true;
                 }
             } catch (error) {
-                console.error('Email error:', error);
-                emailError = error.message;
+                console.error('Email error detailed:', error);
+                emailError = `${error.message}${error.code ? ' (Code: ' + error.code + ')' : ''}`;
             }
         })(),
 

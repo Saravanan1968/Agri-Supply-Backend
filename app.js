@@ -814,29 +814,44 @@ Agri-Supply Logistics`;
         // 1. Send Email Alert
         (async () => {
             try {
-                if (process.env.EMAIL_USER && process.env.EMAIL_USER !== 'dummy@example.com') {
-                    // Filter out invalid/placeholder emails
-                    const validRecipients = recipients.filter(email =>
-                        email && email.includes('@') && email !== 'hi@gmail.com'
-                    );
+                // Filter out invalid/placeholder emails
+                const validRecipients = recipients.filter(email =>
+                    email && email.includes('@') && email !== 'hi@gmail.com'
+                );
 
-                    if (validRecipients.length > 0) {
-                        const info = await transporter.sendMail({
-                            from: `"Agri-Supply Alerts" <${process.env.EMAIL_USER}>`,
-                            to: validRecipients.join(', '),
-                            subject: `⚠️ URGENT: Shipment Delayed - ${productName}`,
-                            text: messageBody
-                        });
-                        console.log('Delay Email sent successfully:', info.messageId, 'to:', validRecipients);
+                if (validRecipients.length === 0) {
+                    emailError = 'No valid recipients';
+                    return;
+                }
+
+                // Prefer Brevo API if Key is present (Bypasses Render blocking)
+                if (process.env.BREVO_API_KEY) {
+                    console.log('Sending Delay Alert via Brevo API...');
+                    const brevoRes = await sendEmailViaBrevo(
+                        validRecipients,
+                        `⚠️ URGENT: Shipment Delayed - ${productName}`,
+                        messageBody
+                    );
+                    if (brevoRes.success) {
                         emailSuccess = true;
                     } else {
-                        console.log('No valid recipients for delay email.');
-                        emailSuccess = false;
-                        emailError = 'No valid recipients';
+                        emailError = `Brevo API Error: ${brevoRes.error}`;
                     }
+                    return;
+                }
+
+                // Fallback to SMTP (might still timeout on Render)
+                if (process.env.EMAIL_USER && process.env.EMAIL_USER !== 'dummy@example.com') {
+                    const info = await transporter.sendMail({
+                        from: `"Agri-Supply Alerts" <${process.env.EMAIL_USER}>`,
+                        to: validRecipients.join(', '),
+                        subject: `⚠️ URGENT: Shipment Delayed - ${productName}`,
+                        text: messageBody
+                    });
+                    console.log('Delay Email sent successfully via SMTP:', info.messageId);
+                    emailSuccess = true;
                 } else {
                     console.log('\n--- [DUMMY MODE] EMAIL DISPATCH ---');
-                    console.log(`To: ${recipients.join(', ')}`);
                     emailSuccess = true;
                 }
             } catch (error) {

@@ -800,52 +800,75 @@ Agri-Supply Logistics`;
 
     let emailSuccess = false;
     let smsSuccess = false;
+    let emailError = null;
+    let smsError = null;
 
-    // 1. Send Email Alert
-    try {
-        if (process.env.EMAIL_USER && process.env.EMAIL_USER !== 'dummy@example.com') {
-            const info = await transporter.sendMail({
-                from: `"Agri-Supply Alerts" <${process.env.EMAIL_USER}>`,
-                to: recipients.join(', '),
-                subject: `⚠️ URGENT: Shipment Delayed - ${productName}`,
-                text: messageBody
-            });
-            console.log('Delay Email sent successfully:', info.messageId, 'to:', recipients);
-            emailSuccess = true;
-        } else {
-            console.log('\n--- [DUMMY MODE] EMAIL DISPATCH ---');
-            console.log(`To: ${recipients.join(', ')}`);
-            console.log(`Subject: ⚠️ URGENT: Shipment Delayed - ${productName}`);
-            emailSuccess = true;
-        }
-    } catch (error) {
-        console.error('Email error:', error);
-    }
+    // Run notifications in parallel
+    await Promise.allSettled([
+        // 1. Send Email Alert
+        (async () => {
+            try {
+                if (process.env.EMAIL_USER && process.env.EMAIL_USER !== 'dummy@example.com') {
+                    // Filter out invalid/placeholder emails
+                    const validRecipients = recipients.filter(email =>
+                        email && email.includes('@') && email !== 'hi@gmail.com'
+                    );
 
-    // 2. Send WhatsApp Alert
-    try {
-        if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_ACCOUNT_SID !== 'dummy_sid') {
-            await twilioClient.messages.create({
-                body: messageBody,
-                from: `whatsapp:${process.env.TWILIO_PHONE_NUMBER}`,
-                to: `whatsapp:${farmerPhone || '+1234567890'}`
-            });
-            smsSuccess = true;
-        } else {
-            console.log('\n--- [DUMMY MODE] WHATSAPP DISPATCH ---');
-            console.log(`To: whatsapp:${farmerPhone}`);
-            smsSuccess = true;
-        }
-    } catch (error) {
-        console.error('Twilio error:', error);
-    }
+                    if (validRecipients.length > 0) {
+                        const info = await transporter.sendMail({
+                            from: `"Agri-Supply Alerts" <${process.env.EMAIL_USER}>`,
+                            to: validRecipients.join(', '),
+                            subject: `⚠️ URGENT: Shipment Delayed - ${productName}`,
+                            text: messageBody
+                        });
+                        console.log('Delay Email sent successfully:', info.messageId, 'to:', validRecipients);
+                        emailSuccess = true;
+                    } else {
+                        console.log('No valid recipients for delay email.');
+                        emailSuccess = false;
+                        emailError = 'No valid recipients';
+                    }
+                } else {
+                    console.log('\n--- [DUMMY MODE] EMAIL DISPATCH ---');
+                    console.log(`To: ${recipients.join(', ')}`);
+                    emailSuccess = true;
+                }
+            } catch (error) {
+                console.error('Email error:', error);
+                emailError = error.message;
+            }
+        })(),
+
+        // 2. Send WhatsApp/SMS Alert
+        (async () => {
+            try {
+                if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_ACCOUNT_SID !== 'dummy_sid' && process.env.TWILIO_PHONE_NUMBER) {
+                    await twilioClient.messages.create({
+                        body: messageBody,
+                        from: `whatsapp:${process.env.TWILIO_PHONE_NUMBER}`,
+                        to: `whatsapp:${farmerPhone || '+1234567890'}`
+                    });
+                    smsSuccess = true;
+                } else {
+                    console.log('\n--- [DUMMY MODE] WHATSAPP DISPATCH ---');
+                    console.log(`To: whatsapp:${farmerPhone}`);
+                    smsSuccess = true;
+                }
+            } catch (error) {
+                console.error('Twilio error:', error);
+                smsError = error.message;
+            }
+        })()
+    ]);
 
     res.json({
-        success: true,
-        message: 'Notification alert processed.',
+        success: emailSuccess || smsSuccess, // Report success if at least one worked
+        message: (emailSuccess || smsSuccess) ? 'Notification alert processed.' : 'Failed to send notifications.',
         details: {
             emailSent: emailSuccess,
+            emailError: emailError,
             smsSuccess: smsSuccess,
+            smsError: smsError,
             recipient: farmerEmail,
             mode: process.env.EMAIL_USER ? 'LIVE' : 'DUMMY'
         }
@@ -3137,7 +3160,7 @@ const checkStatus = async () => {
 };
 
 
-setInterval(checkStatus, 5000);
+setInterval(checkStatus, 30000);
 
 
 

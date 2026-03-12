@@ -900,7 +900,8 @@ Agri-Supply Logistics`;
                     emailSuccess = true;
                 } else {
                     console.log('\n--- [DUMMY MODE] EMAIL DISPATCH ---');
-                    emailSuccess = true;
+                    emailError = "Backend running in DUMMY mode (no email credentials)";
+                    emailSuccess = false;
                 }
             } catch (error) {
                 console.error('Email error detailed:', error);
@@ -939,7 +940,7 @@ Agri-Supply Logistics`;
             smsSuccess: smsSuccess,
             smsError: smsError,
             recipient: farmerEmail,
-            mode: process.env.EMAIL_USER ? 'LIVE' : 'DUMMY'
+            mode: process.env.BREVO_API_KEY ? 'BREVO' : (process.env.EMAIL_USER ? 'SMTP' : 'DUMMY')
         }
     });
 });
